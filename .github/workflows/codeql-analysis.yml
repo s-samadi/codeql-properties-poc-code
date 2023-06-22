@@ -71,5 +71,5 @@ jobs:
     - name: Upload artifacts  
       uses: actions/upload-artifact@v3
       with:
-        name: debug-artifacts-cpp
-        path: ${{ runner.temp }}/codeql_databases/${{ matrix.language }}
+        name: debug-artifacts-java
+        path: /home/runner/work/codeql-properties-poc-code/codeql-properties-poc-code/codeql-db
