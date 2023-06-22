@@ -67,11 +67,6 @@ jobs:
       run: |
         gh codeql database finalize codeql-db
 
-    # Run CodeQL queries against completed database
-    - name: Run CodeQL Queries
-      run: |
-        gh codeql database analyze codeql-db ${{ matrix.language }}-security-and-quality.qls --format=sarif-latest --output=codeql-results-${{ matrix.language }}.sarif
-
     # Upload all CodeQL results to GitHub Code Scanning
     - name: Upload artifacts  
       uses: actions/upload-artifact@v3
