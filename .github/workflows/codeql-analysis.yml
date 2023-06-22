@@ -50,15 +50,15 @@ jobs:
         # then build the application
         echo "Build application using command line"
         javac Main.java
-
-     # Index csv files 
-     - name: Index CSV
-       run:
+ 
+   # Index csv files 
+    - name: Index CSV
+      run: |
          "${CODEQL_BINARY_PATH}"/codeql database index-files --language=csv --include *.csv codeql-db
 
-     # Index xml files 
-     - name: Index XML
-       run:
+    # Index xml files 
+    - name: Index XML
+      run: |
          "${CODEQL_BINARY_PATH}"/codeql database index-files --language=xml --include *.xml codeql-db
 
     # Stop tracing and convert trace data to database
