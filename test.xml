@@ -1,0 +1,10 @@
+<test>
+   <item>
+        <name>username</name>
+        <password>password</password>
+   </item>
+   <item>
+        <name>user1</name>
+        <password>password123</password>        
+   </item>
+</test>
