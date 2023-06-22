@@ -1,0 +1,79 @@
+name: "CodeQL manual"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  # schedule:
+  #   - cron: '43 3 * * 5'
+  workflow_dispatch:
+
+env:
+  CODEQL_BINARY_PATH: "/opt/hostedtoolcache/CodeQL/2.12.6-20230403/x64/codeql" # 2.13.0-20230414
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby', 'swift' ]
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    steps:
+    - name: Find CodeQL binary path
+      run: |
+        find "${CODEQL_BINARY_PATH}" -type f -name "codeql"
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL Database and tracing
+      run: |
+        "${CODEQL_BINARY_PATH}"/codeql database init --source-root=. --language=${{ matrix.language }} --begin-tracing codeql-db
+
+    # Command-line programs to run using the OS shell
+    - name: Build
+      run: |
+        # set up CodeQL first
+        . codeql-db/temp/tracingEnvironment/start-tracing.sh >> $GITHUB_ENV
+        # then build the application
+        echo "Build application using command line"
+        javac Main.java
+
+     # Index csv files 
+     - name: Index CSV
+       run:
+         "${CODEQL_BINARY_PATH}"/codeql database index-files --language=csv --include *.csv codeql-db
+
+     # Index xml files 
+     - name: Index XML
+       run:
+         "${CODEQL_BINARY_PATH}"/codeql database index-files --language=xml --include *.xml codeql-db
+
+    # Stop tracing and convert trace data to database
+    - name: Finalize CodeQL Database
+      run: |
+        "${CODEQL_BINARY_PATH}"/codeql database finalize codeql-db
+
+    # Run CodeQL queries against completed database
+    - name: Run CodeQL Queries
+      run: |
+        "${CODEQL_BINARY_PATH}"/codeql database analyze codeql-db ${{ matrix.language }}-security-and-quality.qls --format=sarif-latest --output=codeql-results-${{ matrix.language }}.sarif
+
+    # Upload all CodeQL results to GitHub Code Scanning
+    - name: Upload artifacts  
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug-artifacts-cpp
+        path: ${{ runner.temp }}/codeql_databases/${{ matrix.language }}
